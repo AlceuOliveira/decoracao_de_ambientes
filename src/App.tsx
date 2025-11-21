@@ -13,8 +13,9 @@ import {
   ImageVariation 
 } from './types';
 
-// Serviços
-import { analyzeRoomStructure, generateDecoratedRoom, getDesignDetailsAndShopping } from './services/geminiService';
+// Serviços (Frontend API Client)
+// CORREÇÃO AQUI: Removido o ".ts" do final
+import { analyzeRoomStructure, generateDecoratedRoom, getDesignDetailsAndShopping } from './services/apiClient';
 
 // Componentes de Passo (Views)
 import { WelcomeStep } from './steps/WelcomeStep';
@@ -22,7 +23,7 @@ import { UploadStep } from './steps/UploadStep';
 import { RoomDetailsStep } from './steps/RoomDetailsStep';
 import { StylePrefsStep } from './steps/StylePrefsStep';
 import { GeneratingStep } from './steps/GeneratingStep';
-import { ResultView } from './components/ResultView'; // ResultView é um componente final, pode ficar em components
+import { ResultView } from './components/ResultView';
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>({

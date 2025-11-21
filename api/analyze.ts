@@ -1,58 +1,28 @@
-// Dentro de /api/analyze.ts
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+// Caminho: api/analyze.ts (Backend)
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// A lógica da sua função foi movida para cá
-async function analyzeOnServer(base64Image: string): Promise<string> {
-  // Inicializa a Gemini de forma segura no servidor
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+export const config = {
+  maxDuration: 30, // 30 segundos de timeout
+};
 
-  // Remove o cabeçalho do base64, se houver
-  const cleanBase64 = base64Image.split(',')[1] || base64Image;
-
-  const response = await model.generateContent({
-    contents: [{
-      parts: [
-        {
-          inlineData: {
-            mimeType: 'image/jpeg',
-            data: cleanBase64,
-          },
-        },
-        {
-          text: 'Você é um especialista em arquitetura. Analise esta imagem de um ambiente e descreva objetivamente APENAS os elementos estruturais visíveis como: 1. Janelas e iluminação natural. 2. Portas e passagens. 3. Formato aparente do espaço. 4. Piso e teto (materiais visíveis). 5. Limitações físicas (pilastras, vigas). Seja conciso. Não sugira decoração ainda.'
-        }
-      ]
-    }]
-  });
-
-  return response.response.text();
-}
-
-// O "handler" da Vercel que executa a função
-export default async function handler(
-  request: VercelRequest,
-  response: VercelResponse,
-) {
-  if (request.method !== 'POST') {
-    return response.status(405).json({ error: 'Method not allowed' });
-  }
-
-  // Pega a imagem em base64 que o frontend enviou
-  const { image } = request.body;
-
-  if (!image) {
-    return response.status(400).json({ error: 'Image base64 is required' });
+export default async function handler(req: any, res: any) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // Chama a nossa função de análise segura
-    const analysisText = await analyzeOnServer(image);
-    // Devolve o texto da análise para o frontend
-    return response.status(200).json({ text: analysisText });
+    const { image } = req.body;
+    const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    const prompt = "Analise a estrutura desta imagem de um cômodo. Descreva os pontos principais como layout, janelas, portas e quaisquer móveis existentes em uma frase curta e direta.";
+    const imagePart = { inlineData: { data: image.split(',')[1], mimeType: 'image/jpeg' } };
+    
+    const result = await model.generateContent([prompt, imagePart]);
+    res.status(200).json({ analysis: result.response.text() });
+
   } catch (error) {
-    console.error("Error in Gemini API call:", error);
-    return response.status(500).json({ error: 'Failed to analyze image' });
+    console.error("Error in /api/analyze:", error);
+    res.status(500).json({ error: 'Failed to analyze image' });
   }
 }
