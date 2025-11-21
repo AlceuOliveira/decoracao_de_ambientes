@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Trash2 } from 'lucide-react';
 import { FileUpload } from '../components/FileUpload';
-import { Button } from '../../components/Button';
+import { Button } from '../components/Button';
 
 // As props que este componente precisa receber
 interface UploadStepProps {
