@@ -1,3 +1,7 @@
+import { GeneratingStep } from './src/steps/GeneratingStep';
+import { RoomDetailsStep } from './src/steps/RoomDetailsStep';
+import { UploadStep } from './src/steps/UploadStep';
+import { WelcomeStep } from './src/steps/WelcomeStep';
 import React, { useState } from 'react';
 import { LayoutTemplate, ArrowRight, CheckCircle2, Palette, Armchair, DollarSign, Loader2, Trash2, Images, Wand2 } from 'lucide-react';
 import { 
@@ -17,7 +21,6 @@ import { ResultView } from './components/ResultView';
 import { StepWizard } from './components/StepWizard';
 
 // --- OPTIONS CONSTANTS ---
-const ROOM_TYPES = ['Sala de Estar', 'Quarto', 'Cozinha', 'Escritório', 'Banheiro', 'Varanda'];
 const STYLES = ['Escandinavo', 'Industrial', 'Minimalista', 'Boho', 'Clássico', 'Moderno', 'Rústico', 'Japandi'];
 const BUDGETS = ['Econômico', 'Intermediário', 'Alto Padrão'] as const;
 
@@ -45,15 +48,9 @@ const App: React.FC = () => {
   });
 
   // Temporary state for file upload step before proceeding
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-  
+    
   // State for custom inputs
-  const [isCustomStyle, setIsCustomStyle] = useState(false);
-  const [customStyleText, setCustomStyleText] = useState('');
-  
-  const [isCustomRoomType, setIsCustomRoomType] = useState(false);
-  const [customRoomTypeText, setCustomRoomTypeText] = useState('');
-
+    
   // --- ACTIONS ---
 
   const updatePref = (key: keyof DesignPreferences, value: any) => {
@@ -71,24 +68,7 @@ const App: React.FC = () => {
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleContinueFromUpload = () => {
-    if (uploadedImages.length > 0) {
-      // Initialize variations
-      const initialVariations: ImageVariation[] = uploadedImages.map((img, idx) => ({
-        id: `var-${idx}-${Date.now()}`,
-        original: img,
-        generated: null
-      }));
-
-      setState(prev => ({
-        ...prev,
-        result: { ...prev.result, variations: initialVariations },
-        step: AppStep.ROOM_DETAILS
-      }));
-    }
-  };
-
-  const handleNext = () => {
+    const handleNext = () => {
     if (state.step === AppStep.ROOM_DETAILS) setState(prev => ({ ...prev, step: AppStep.STYLE_PREFS }));
     else if (state.step === AppStep.STYLE_PREFS) runAiPipeline();
   };
@@ -194,83 +174,7 @@ const App: React.FC = () => {
 
   // --- RENDERERS ---
 
-  const renderWelcome = () => (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6 animate-fade-in">
-      <div className="w-24 h-24 bg-stone-900 rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-stone-400">
-        <LayoutTemplate className="w-10 h-10 text-white" />
-      </div>
-      <h1 className="text-5xl md:text-6xl font-serif text-stone-900 mb-6 leading-tight">
-        Lumina <span className="italic text-stone-500">Interiors</span>
-      </h1>
-      <p className="text-xl text-stone-500 max-w-md mb-10 leading-relaxed">
-        A inteligência artificial que reinventa seu espaço. Envie fotos ou vídeos e receba o projeto.
-      </p>
-      <Button 
-        onClick={() => setState(prev => ({ ...prev, step: AppStep.UPLOAD }))}
-        className="text-lg px-10 py-4"
-        icon={<ArrowRight className="w-5 h-5" />}
-      >
-        Começar Agora
-      </Button>
-    </div>
-  );
-
-  const renderUpload = () => (
-    <div className="max-w-xl mx-auto pt-12 px-4 pb-24">
-       <button onClick={() => setState(prev => ({ ...prev, step: AppStep.WELCOME }))} className="mb-6 text-stone-400 hover:text-stone-900 text-sm">← Voltar</button>
-      <h2 className="text-3xl font-serif text-stone-900 mb-2">O ambiente</h2>
-      <p className="text-stone-500 mb-8">Envie imagens ou um vídeo curto do espaço que deseja transformar.</p>
-      
-      <div className="space-y-6">
-        <FileUpload onFilesSelected={handleFilesSelect} />
-
-        {/* Image Grid Preview */}
-        {uploadedImages.length > 0 && (
-            <div className="space-y-3 animate-fade-in">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-stone-900 uppercase tracking-wide">
-                        Capturas Selecionadas ({uploadedImages.length})
-                    </h3>
-                    <button onClick={() => setUploadedImages([])} className="text-xs text-red-500 hover:text-red-700">
-                        Limpar tudo
-                    </button>
-                </div>
-                
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                    {uploadedImages.map((img, idx) => (
-                        <div key={idx} className="relative aspect-square group">
-                            <img src={img} alt={`Upload ${idx}`} className="w-full h-full object-cover rounded-lg border border-stone-200" />
-                            <button 
-                                onClick={() => removeUploadedImage(idx)}
-                                className="absolute top-1 right-1 bg-white/90 p-1 rounded-full text-stone-900 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                                <Trash2 className="w-3 h-3" />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        )}
-      </div>
-
-      {/* Floating Continue Button */}
-      {uploadedImages.length > 0 && (
-          <div className="fixed bottom-6 left-0 right-0 px-4 z-50 animate-fade-in">
-             <div className="max-w-md mx-auto">
-                <Button 
-                    fullWidth 
-                    onClick={handleContinueFromUpload}
-                    className="shadow-xl"
-                    icon={<ArrowRight className="w-4 h-4" />}
-                >
-                    Continuar
-                </Button>
-             </div>
-          </div>
-      )}
-    </div>
-  );
-
+    
   const renderRoomDetails = () => (
     <StepWizard 
       stepIndex={1} 
@@ -557,11 +461,38 @@ const App: React.FC = () => {
       </header>
 
       <main className="max-w-6xl mx-auto px-4">
-        {state.step === AppStep.WELCOME && renderWelcome()}
-        {state.step === AppStep.UPLOAD && renderUpload()}
-        {state.step === AppStep.ROOM_DETAILS && renderRoomDetails()}
-        {state.step === AppStep.STYLE_PREFS && renderStylePrefs()}
-        {state.step === AppStep.GENERATING && renderLoading()}
+        {state.step === AppStep.WELCOME && (
+  <WelcomeStep 
+    onStart={() => setState(prev => ({ ...prev, step: AppStep.UPLOAD }))} 
+  />
+)}
+
+        {state.step === AppStep.UPLOAD && (
+  <UploadStep
+    onBack={() => setState(prev => ({ ...prev, step: AppStep.WELCOME }))}
+    onContinue={(images) => {
+      const initialVariations: ImageVariation[] = images.map((img, idx) => ({
+        id: `var-${idx}-${Date.now()}`,
+        original: img,
+        generated: null
+      }));
+
+      setState(prev => ({
+        ...prev,
+        result: { ...prev.result, variations: initialVariations },
+        step: AppStep.ROOM_DETAILS
+      }));
+    }}
+  />
+)}
+
+        {state.step === AppStep.GENERATING && (
+  <GeneratingStep 
+    loadingStage={state.loadingStage}
+    imageCount={state.result.variations.length}
+  />
+)}
+
         {state.step === AppStep.RESULT && (
             <ResultView result={state.result} onRestart={handleRestart} />
         )}
