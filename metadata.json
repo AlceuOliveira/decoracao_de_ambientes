@@ -1,0 +1,7 @@
+{
+  "name": "Lumina Interiors AI",
+  "description": "Transform your living space with AI-powered interior design visualizations and shopping suggestions.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
