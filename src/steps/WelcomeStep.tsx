@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { LayoutTemplate, ArrowRight } from 'lucide-react';
-import { Button } from '../components/Button';
+import { Button } from '../../components/Button';
 
 // 1. Definimos as "props" que este componente vai receber.
 //    Neste caso, ele precisa de uma função para ser executada quando o botão "Começar" for clicado.

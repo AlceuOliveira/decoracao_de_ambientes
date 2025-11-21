@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { StepWizard } from '../components/StepWizard';
-import { Button } from '../components/Button';
+import { Button } from '../../components/Button';
 import { DesignPreferences } from '../types';
 
 // Constantes que estavam no App.tsx
